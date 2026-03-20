@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const navLinks = [
   { label: "Fitur", href: "#features" },
   { label: "Pengguna", href: "#users" },
@@ -30,18 +32,18 @@ export function Navbar() {
         </nav>
 
         <div className="flex items-center gap-3">
-          <button
-            type="button"
+          <Link
+            href="/login"
             className="hidden h-10 min-w-[100px] items-center justify-center rounded-lg bg-slate-100 px-4 text-sm font-bold text-slate-900 transition-all hover:bg-slate-200 sm:flex"
           >
             Masuk
-          </button>
-          <button
-            type="button"
+          </Link>
+          <Link
+            href="/login"
             className="flex h-10 min-w-[120px] items-center justify-center rounded-lg bg-[#1e3b8a] px-5 text-sm font-bold text-white shadow-lg shadow-[#1e3b8a]/20 transition-all hover:opacity-90"
           >
             Daftar
-          </button>
+          </Link>
         </div>
       </div>
     </header>
