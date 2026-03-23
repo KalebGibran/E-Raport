@@ -1,6 +1,7 @@
 import "server-only";
 
-import { createClient } from "@supabase/supabase-js";
+import { normalizeDashboardRole } from "@/lib/auth/roles";
+import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 
 type TeacherRole = "subject_teacher" | "homeroom_teacher";
 type ProfileRole = "student" | TeacherRole;
@@ -31,19 +32,7 @@ export type CreateManagedUserResult = {
 const LOCAL_IDENTIFIER_PATTERN = /^[a-z0-9._-]+$/;
 
 function getAdminClient() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  if (!supabaseUrl || !serviceRoleKey) {
-    throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
-  }
-
-  return createClient(supabaseUrl, serviceRoleKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  });
+  return createAdminSupabaseClient();
 }
 
 function normalizeIdentifier(raw: string, label: string) {
@@ -101,9 +90,11 @@ export async function createManagedUser(input: CreateManagedUserInput): Promise<
     password: credentials.password,
     email_confirm: true,
     user_metadata: {
+      name: input.fullName,
       full_name: input.fullName,
       account_type: input.type,
       login_identifier: credentials.loginId,
+      role: normalizeDashboardRole(credentials.role),
     },
   });
 

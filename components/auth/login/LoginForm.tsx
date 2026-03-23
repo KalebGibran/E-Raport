@@ -5,15 +5,6 @@ import { useRouter } from "next/navigation";
 
 import { supabase } from "@/lib/supabase";
 
-type SupportedRole = "admin" | "student" | "subject_teacher" | "homeroom_teacher";
-
-const ROLE_REDIRECT: Record<SupportedRole, string> = {
-  admin: "/admin",
-  student: "/student",
-  subject_teacher: "/teacher",
-  homeroom_teacher: "/teacher",
-};
-
 function buildEmailCandidates(identifier: string) {
   const value = identifier.trim().toLowerCase();
   if (!value) return [];
@@ -73,7 +64,7 @@ export function LoginForm() {
         .from("profiles")
         .select("role")
         .eq("id", signedInUserId)
-        .maybeSingle();
+        .single();
 
       if (profileError) {
         setErrorMessage(profileError.message);
@@ -90,12 +81,8 @@ export function LoginForm() {
         return;
       }
 
-      if (profile.role in ROLE_REDIRECT) {
-        router.replace(ROLE_REDIRECT[profile.role as SupportedRole]);
-        return;
-      }
-
-      setErrorMessage("Role is not allowed to access this application.");
+      router.replace("/dashboard");
+      return;
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "Unexpected error.");
     } finally {

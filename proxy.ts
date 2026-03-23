@@ -3,14 +3,20 @@ import { NextResponse, type NextRequest } from "next/server";
 
 function isProtectedPath(pathname: string) {
   return (
+    pathname.startsWith("/dashboard") ||
     pathname.startsWith("/admin") ||
     pathname.startsWith("/student") ||
     pathname.startsWith("/teacher")
   );
 }
 
+function isLegacyDashboardPath(pathname: string) {
+  return pathname === "/admin" || pathname === "/student" || pathname === "/teacher";
+}
+
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
+  const pathname = request.nextUrl.pathname;
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -35,7 +41,7 @@ export async function proxy(request: NextRequest) {
     }
   );
 
-  if (isProtectedPath(request.nextUrl.pathname) === false) {
+  if (isProtectedPath(pathname) === false) {
     return response;
   }
 
@@ -45,6 +51,10 @@ export async function proxy(request: NextRequest) {
 
   if (!user) {
     return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  if (isLegacyDashboardPath(pathname)) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   return response;
