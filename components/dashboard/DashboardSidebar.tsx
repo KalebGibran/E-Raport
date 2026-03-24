@@ -27,10 +27,24 @@ function getNavItems(role: DashboardRole): NavItem[] {
       { label: "Data Siswa", icon: "group", href: "/dashboard/students", roles: ["admin"] },
       { label: "Data Guru", icon: "person", href: "/dashboard/teachers", roles: ["admin"] },
       { label: "Mata Pelajaran", icon: "book", href: "/dashboard/subjects", roles: ["admin"] },
+      { label: "Data Kelas", icon: "meeting_room", href: "/dashboard/classrooms", roles: ["admin"] },
+      { label: "Periode Akademik", icon: "calendar_month", href: "/dashboard/periods", roles: ["admin"] },
+      {
+        label: "Enrollment",
+        icon: "how_to_reg",
+        href: "/dashboard/enrollments",
+        roles: ["admin"],
+      },
       {
         label: "Penugasan Guru",
         icon: "assignment_ind",
         href: "/dashboard/assignments",
+        roles: ["admin"],
+      },
+      {
+        label: "Academic Management",
+        icon: "school",
+        href: "/dashboard/promotion",
         roles: ["admin"],
       },
     ];

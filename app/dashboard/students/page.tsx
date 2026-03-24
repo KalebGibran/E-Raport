@@ -27,7 +27,7 @@ export default async function StudentsPage({ searchParams }: StudentsPageProps) 
     <div className="mx-auto w-full max-w-7xl space-y-6 p-8">
       <AdminPageHeader
         title="Data Siswa"
-        description="Kelola data siswa aktif/nonaktif untuk kebutuhan akademik dan raport."
+        description="Kelola data siswa aktif/nonaktif. Kelas/periode di tabel diambil dari enrollment terbaru tiap siswa."
       />
 
       <AdminStatusNotice status={params.status} message={params.message} />
@@ -93,6 +93,8 @@ export default async function StudentsPage({ searchParams }: StudentsPageProps) 
           { key: "nis", label: "NIS" },
           { key: "nisn", label: "NISN" },
           { key: "full_name", label: "Nama" },
+          { key: "current_classroom", label: "Kelas Terbaru" },
+          { key: "current_period", label: "Periode/Semester Terbaru" },
           { key: "gender", label: "Gender" },
           { key: "birth_date", label: "Tgl Lahir" },
           { key: "is_active", label: "Aktif" },
@@ -126,6 +128,21 @@ export default async function StudentsPage({ searchParams }: StudentsPageProps) 
                 defaultValue={student.full_name}
                 className="w-52 rounded-md border border-slate-300 px-2 py-1 text-sm"
               />
+            </td>
+            <td className="px-4 py-3 text-sm font-medium text-slate-700">
+              {student.current_classroom_name ?? "-"}
+            </td>
+            <td className="px-4 py-3 text-sm text-slate-700">
+              {student.current_period_name ? (
+                <>
+                  {student.current_period_name}
+                  {student.current_semester ? (
+                    <span className="ml-2 text-xs text-slate-500">(Semester {student.current_semester})</span>
+                  ) : null}
+                </>
+              ) : (
+                "-"
+              )}
             </td>
             <td className="px-4 py-3">
               <select
@@ -183,4 +200,3 @@ export default async function StudentsPage({ searchParams }: StudentsPageProps) 
     </div>
   );
 }
-

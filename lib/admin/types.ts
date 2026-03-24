@@ -41,3 +41,34 @@ export type AssignmentFormInput = {
   academicPeriodId: string;
 };
 
+export type PromotionFormInput = {
+  currentPeriodId: string;
+  targetPeriodId: string;
+  excludedStudentIds?: string[];
+};
+
+export type EnrollmentFormInput = {
+  studentId: string;
+  classroomId: string;
+  academicPeriodId: string;
+  status?: "active" | "completed" | "promoted" | "retained" | "transferred";
+};
+
+export type ClassroomFormInput = {
+  schoolLevel: "sd" | "smp" | "sma";
+  gradeLevel: number;
+  section: string;
+  classroomName: string;
+  nextClassroomId?: string | null;
+  isActive: boolean;
+};
+
+export type AcademicPeriodFormInput = {
+  academicYearId: string;
+  semester: 1 | 2;
+  periodName: string;
+  startDate: string;
+  endDate: string;
+  status: "planned" | "active" | "closed";
+  isCurrent: boolean;
+};

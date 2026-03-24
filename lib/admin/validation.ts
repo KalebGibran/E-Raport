@@ -62,8 +62,17 @@ export function mapPostgresError(errorMessage: string) {
     if (lower.includes("students_nisn_key")) return "NISN sudah digunakan.";
     if (lower.includes("teachers_teacher_code_key")) return "Kode guru sudah digunakan.";
     if (lower.includes("subjects_subject_code_key")) return "Kode mapel sudah digunakan.";
+    if (lower.includes("classrooms_school_level_grade_level_section_key")) {
+      return "Kombinasi level, tingkat, dan rombel kelas sudah ada.";
+    }
+    if (lower.includes("academic_periods_academic_year_id_semester_key")) {
+      return "Periode untuk tahun ajaran dan semester ini sudah ada.";
+    }
     if (lower.includes("subject_teacher_assignments_subject_id_classroom_id_academic_p_key")) {
       return "Assignment mapel untuk kelas & periode ini sudah ada.";
+    }
+    if (lower.includes("enrollments_student_id_academic_period_id_key")) {
+      return "Siswa sudah terdaftar pada periode akademik ini.";
     }
 
     return "Data duplikat terdeteksi.";
@@ -73,6 +82,17 @@ export function mapPostgresError(errorMessage: string) {
     return "Relasi data tidak valid atau masih dipakai data lain.";
   }
 
+  if (lower.includes("current period and target period cannot be the same")) {
+    return "Periode target tidak boleh sama dengan periode saat ini.";
+  }
+
+  if (lower.includes("academic period not found")) {
+    return "Periode akademik yang dipilih tidak ditemukan.";
+  }
+
+  if (lower.includes("uq_academic_periods_single_current")) {
+    return "Hanya boleh ada satu periode akademik dengan status current.";
+  }
+
   return errorMessage;
 }
-

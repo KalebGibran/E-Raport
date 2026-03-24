@@ -6,7 +6,11 @@ function getPageLabel(pathname: string) {
   if (pathname.startsWith("/dashboard/students")) return "Data Siswa";
   if (pathname.startsWith("/dashboard/teachers")) return "Data Guru";
   if (pathname.startsWith("/dashboard/subjects")) return "Mata Pelajaran";
+  if (pathname.startsWith("/dashboard/classrooms")) return "Data Kelas";
+  if (pathname.startsWith("/dashboard/periods")) return "Periode Akademik";
+  if (pathname.startsWith("/dashboard/enrollments")) return "Enrollment";
   if (pathname.startsWith("/dashboard/assignments")) return "Penugasan Guru";
+  if (pathname.startsWith("/dashboard/promotion")) return "Academic Management";
   return "Dashboard";
 }
 
