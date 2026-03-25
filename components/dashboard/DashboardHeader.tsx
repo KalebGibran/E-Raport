@@ -10,6 +10,7 @@ function getPageLabel(pathname: string) {
   if (pathname.startsWith("/dashboard/periods")) return "Periode Akademik";
   if (pathname.startsWith("/dashboard/enrollments")) return "Enrollment";
   if (pathname.startsWith("/dashboard/assignments")) return "Penugasan Guru";
+  if (pathname.startsWith("/dashboard/attendance")) return "Absensi";
   if (pathname.startsWith("/dashboard/promotion")) return "Academic Management";
   return "Dashboard";
 }

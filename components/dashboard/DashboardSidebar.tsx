@@ -42,6 +42,12 @@ function getNavItems(role: DashboardRole): NavItem[] {
         roles: ["admin"],
       },
       {
+        label: "Rekap Absensi",
+        icon: "fact_check",
+        href: "/dashboard/attendance",
+        roles: ["admin"],
+      },
+      {
         label: "Academic Management",
         icon: "school",
         href: "/dashboard/promotion",
@@ -53,8 +59,7 @@ function getNavItems(role: DashboardRole): NavItem[] {
   if (role === "guru") {
     return [
       { label: "Dashboard", icon: "dashboard", href: "/dashboard", roles: ["guru"] },
-      { label: "Data Siswa", icon: "group", href: "/dashboard", roles: ["guru"] },
-      { label: "Mata Pelajaran", icon: "book", href: "/dashboard", roles: ["guru"] },
+      { label: "Absensi", icon: "fact_check", href: "/dashboard/attendance", roles: ["guru"] },
       { label: "Nilai Raport", icon: "description", href: "/dashboard", roles: ["guru"] },
     ];
   }
