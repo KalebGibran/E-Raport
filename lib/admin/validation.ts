@@ -82,6 +82,10 @@ export function mapPostgresError(errorMessage: string) {
     return "Relasi data tidak valid atau masih dipakai data lain.";
   }
 
+  if (lower.includes("scores_remedial_score_range_check")) {
+    return "Nilai remedial harus di antara 0 sampai 100.";
+  }
+
   if (lower.includes("current period and target period cannot be the same")) {
     return "Periode target tidak boleh sama dengan periode saat ini.";
   }

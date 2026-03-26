@@ -20,6 +20,7 @@ type AssignmentRelationRow = {
 
 export type AssignmentListItem = {
   id: string;
+  teacherId: string;
   teacherName: string;
   teacherCode: string | null;
   subjectName: string;
@@ -95,6 +96,7 @@ export async function listAssignments(): Promise<AssignmentListItem[]> {
 
     return {
       id: row.id,
+      teacherId: row.teacher_id,
       teacherName: teacher?.full_name ?? "-",
       teacherCode: teacher?.teacher_code ?? null,
       subjectName: subject?.subject_name ?? "-",

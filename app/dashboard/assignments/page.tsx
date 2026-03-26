@@ -18,9 +18,81 @@ type AssignmentsPageProps = {
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+function parseClassroomSortValue(classroomName: string) {
+  const normalized = classroomName.trim().toUpperCase().replace(/\s+/g, "");
+  const match = normalized.match(/^(\d+)([A-Z].*)?$/);
+  if (!match) {
+    return {
+      grade: Number.POSITIVE_INFINITY,
+      section: normalized,
+    };
+  }
+
+  return {
+    grade: Number(match[1]),
+    section: match[2] ?? "",
+  };
+}
+
+function compareClassroomName(a: string, b: string) {
+  const aKey = parseClassroomSortValue(a);
+  const bKey = parseClassroomSortValue(b);
+
+  if (aKey.grade !== bKey.grade) {
+    return aKey.grade - bKey.grade;
+  }
+
+  return aKey.section.localeCompare(bKey.section);
+}
+
 export default async function AssignmentsPage({ searchParams }: AssignmentsPageProps) {
   const params = await searchParams;
   const [assignments, options] = await Promise.all([listAssignments(), getAssignmentOptions()]);
+  const classroomOptions = [...options.classrooms].sort((a, b) => compareClassroomName(a.label, b.label));
+
+  const assignmentGroups = Array.from(
+    assignments.reduce(
+      (accumulator, assignment) => {
+        const teacherKey = `${assignment.teacherId}:${assignment.teacherCode ?? "-"}`;
+        const existing = accumulator.get(teacherKey);
+
+        if (existing) {
+          existing.rows.push(assignment);
+          return accumulator;
+        }
+
+        accumulator.set(teacherKey, {
+          teacherId: assignment.teacherId,
+          teacherName: assignment.teacherName,
+          teacherCode: assignment.teacherCode,
+          rows: [assignment],
+        });
+        return accumulator;
+      },
+      new Map<
+        string,
+        {
+          teacherId: string;
+          teacherName: string;
+          teacherCode: string | null;
+          rows: typeof assignments;
+        }
+      >()
+    )
+  )
+    .map(([, group]) => {
+      const rows = [...group.rows].sort((a, b) => {
+        const classroomOrder = compareClassroomName(a.classroomName, b.classroomName);
+        if (classroomOrder !== 0) return classroomOrder;
+        return a.subjectName.localeCompare(b.subjectName);
+      });
+
+      return {
+        ...group,
+        rows,
+      };
+    })
+    .sort((a, b) => a.teacherName.localeCompare(b.teacherName));
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-6 p-8">
@@ -61,7 +133,7 @@ export default async function AssignmentsPage({ searchParams }: AssignmentsPageP
             <span className="text-sm font-medium text-slate-700">Kelas</span>
             <select name="classroom_id" required className="w-full rounded-lg border border-slate-300 px-3 py-2">
               <option value="">Pilih kelas</option>
-              {options.classrooms.map((classroom) => (
+              {classroomOptions.map((classroom) => (
                 <option key={classroom.id} value={classroom.id}>
                   {classroom.label}
                 </option>
@@ -99,49 +171,92 @@ export default async function AssignmentsPage({ searchParams }: AssignmentsPageP
       <AdminDataTable
         columns={[
           { key: "teacher", label: "Guru" },
-          { key: "subject", label: "Mapel" },
-          { key: "classroom", label: "Kelas" },
-          { key: "period", label: "Periode" },
-          { key: "actions", label: "Aksi", align: "right" },
+          { key: "count", label: "Jumlah Assignment", align: "right" },
         ]}
-        hasRows={assignments.length > 0}
+        hasRows={assignmentGroups.length > 0}
         emptyMessage="Belum ada assignment guru-mapel."
       >
-        {assignments.map((assignment) => (
-          <tr key={assignment.id}>
-            <td className="px-4 py-3 text-sm">
-              {assignment.teacherName}
-              {assignment.teacherCode ? (
-                <span className="ml-2 text-xs text-slate-500">({assignment.teacherCode})</span>
+        {assignmentGroups.map((group) => (
+          <tr key={`summary-${group.teacherId}`}>
+            <td className="px-4 py-3 text-sm font-semibold text-slate-900">
+              {group.teacherName}
+              {group.teacherCode ? (
+                <span className="ml-2 text-xs font-medium text-slate-500">({group.teacherCode})</span>
               ) : null}
             </td>
-            <td className="px-4 py-3 text-sm">
-              {assignment.subjectName}
-              {assignment.subjectCode ? (
-                <span className="ml-2 text-xs text-slate-500">({assignment.subjectCode})</span>
-              ) : null}
-            </td>
-            <td className="px-4 py-3 text-sm">{assignment.classroomName}</td>
-            <td className="px-4 py-3 text-sm">
-              {assignment.periodName}
-              {assignment.semester ? (
-                <span className="ml-2 text-xs text-slate-500">(Semester {assignment.semester})</span>
-              ) : null}
-            </td>
-            <td className="px-4 py-3 text-right">
-              <form className="inline-flex">
-                <input type="hidden" name="assignment_id" value={assignment.id} />
-                <button
-                  formAction={deleteAssignmentAction}
-                  className="rounded-md bg-red-50 px-3 py-1 text-xs font-semibold text-red-700 hover:bg-red-100"
-                >
-                  Hapus
-                </button>
-              </form>
-            </td>
+            <td className="px-4 py-3 text-right text-sm font-semibold text-slate-700">{group.rows.length}</td>
           </tr>
         ))}
       </AdminDataTable>
+
+      <AdminFormCard
+        title="Detail Assignment Per Guru"
+        description="Klik nama guru untuk melihat mapel yang dipegang per kelas. Urutan kelas disusun dari tingkat rendah ke tinggi."
+      >
+        <div className="space-y-3">
+          {assignmentGroups.length === 0 ? (
+            <p className="text-sm text-slate-500">Belum ada detail assignment.</p>
+          ) : (
+            assignmentGroups.map((group) => (
+              <details key={`group-${group.teacherId}`} className="rounded-lg border border-slate-200 bg-white">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3">
+                  <div className="text-sm font-semibold text-slate-800">
+                    {group.teacherName}
+                    {group.teacherCode ? (
+                      <span className="ml-2 text-xs font-medium text-slate-500">({group.teacherCode})</span>
+                    ) : null}
+                  </div>
+                  <span className="text-xs font-medium text-slate-500">{group.rows.length} assignment</span>
+                </summary>
+                <div className="border-t border-slate-200 px-4 py-3">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-sm">
+                      <thead>
+                        <tr className="text-xs uppercase tracking-wide text-slate-500">
+                          <th className="px-2 py-2">Kelas</th>
+                          <th className="px-2 py-2">Mapel</th>
+                          <th className="px-2 py-2">Periode</th>
+                          <th className="px-2 py-2 text-right">Aksi</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {group.rows.map((assignment) => (
+                          <tr key={assignment.id} className="border-t border-slate-100">
+                            <td className="px-2 py-2">{assignment.classroomName}</td>
+                            <td className="px-2 py-2">
+                              {assignment.subjectName}
+                              {assignment.subjectCode ? (
+                                <span className="ml-2 text-xs text-slate-500">({assignment.subjectCode})</span>
+                              ) : null}
+                            </td>
+                            <td className="px-2 py-2">
+                              {assignment.periodName}
+                              {assignment.semester ? (
+                                <span className="ml-2 text-xs text-slate-500">(Semester {assignment.semester})</span>
+                              ) : null}
+                            </td>
+                            <td className="px-2 py-2 text-right">
+                              <form className="inline-flex">
+                                <input type="hidden" name="assignment_id" value={assignment.id} />
+                                <button
+                                  formAction={deleteAssignmentAction}
+                                  className="rounded-md bg-red-50 px-3 py-1 text-xs font-semibold text-red-700 hover:bg-red-100"
+                                >
+                                  Hapus
+                                </button>
+                              </form>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </details>
+            ))
+          )}
+        </div>
+      </AdminFormCard>
     </div>
   );
 }

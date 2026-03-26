@@ -48,6 +48,12 @@ function getNavItems(role: DashboardRole): NavItem[] {
         roles: ["admin"],
       },
       {
+        label: "Monitor Nilai",
+        icon: "leaderboard",
+        href: "/dashboard/scores",
+        roles: ["admin"],
+      },
+      {
         label: "Academic Management",
         icon: "school",
         href: "/dashboard/promotion",
@@ -60,7 +66,7 @@ function getNavItems(role: DashboardRole): NavItem[] {
     return [
       { label: "Dashboard", icon: "dashboard", href: "/dashboard", roles: ["guru"] },
       { label: "Absensi", icon: "fact_check", href: "/dashboard/attendance", roles: ["guru"] },
-      { label: "Nilai Raport", icon: "description", href: "/dashboard", roles: ["guru"] },
+      { label: "Nilai UTS/UAS", icon: "grade", href: "/dashboard/scores", roles: ["guru"] },
     ];
   }
 
