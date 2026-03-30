@@ -78,7 +78,6 @@ export async function submitExamScoresAction(formData: FormData) {
     const entries = enrollmentIds.map((enrollmentId) => ({
       enrollmentId,
       score: parseNullableScore(cleanText(formData.get(`score_${enrollmentId}`)), "Nilai awal"),
-      remedialScore: parseNullableScore(cleanText(formData.get(`remedial_${enrollmentId}`)), "Nilai remedial"),
       notes: cleanText(formData.get(`notes_${enrollmentId}`)),
     }));
 

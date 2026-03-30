@@ -65,7 +65,6 @@ type ScoreRow = {
   score_type: "daily" | "uts" | "uas";
   assessment_no: number | null;
   score: number;
-  remedial_score: number | null;
   notes: string | null;
   subjects:
     | {
@@ -133,8 +132,6 @@ export type GuruScoreStudentRow = {
   studentName: string;
   nis: string | null;
   originalScore: number | null;
-  remedialScore: number | null;
-  finalScore: number | null;
   notes: string;
 };
 
@@ -163,22 +160,19 @@ export type AdminScoreMonitorRow = {
   subjectName: string;
   scoreType: ExamScoreType;
   originalScore: number;
-  remedialScore: number | null;
-  finalScore: number;
 };
 
 export type AdminScoreStats = {
-  averageFinalScore: number;
+  averageScore: number;
   totalScoredStudents: number;
   highestScore: number;
-  remedialCount: number;
 };
 
 export type AdminTopScoreRow = {
   studentName: string;
   classroomName: string;
   subjectName: string;
-  finalScore: number;
+  score: number;
 };
 
 export type ScorePageData = {
@@ -211,7 +205,6 @@ export type ScorePageData = {
 export type ScoreEntryInput = {
   enrollmentId: string;
   score: number | null;
-  remedialScore?: number | null;
   notes?: string | null;
 };
 
@@ -257,11 +250,6 @@ function compareClassroomName(a: string, b: string) {
   return aKey.section.localeCompare(bKey.section);
 }
 
-function toFinalScore(score: number, remedialScore: number | null) {
-  if (remedialScore == null) return score;
-  return Math.max(score, remedialScore);
-}
-
 function validateScoreValue(value: number | null, fieldLabel: string) {
   if (value == null) return;
   if (!Number.isFinite(value)) {
@@ -274,10 +262,9 @@ function validateScoreValue(value: number | null, fieldLabel: string) {
 
 function emptyAdminStats(): AdminScoreStats {
   return {
-    averageFinalScore: 0,
+    averageScore: 0,
     totalScoredStudents: 0,
     highestScore: 0,
-    remedialCount: 0,
   };
 }
 
@@ -365,7 +352,7 @@ async function getGuruStudentsByAssignment(params: {
 
   const { data: scoreData, error: scoreError } = await admin
     .from("scores")
-    .select("id, enrollment_id, subject_id, score_type, assessment_no, score, remedial_score, notes")
+    .select("id, enrollment_id, subject_id, score_type, assessment_no, score, notes")
     .eq("subject_id", assignment.subjectId)
     .eq("score_type", scoreType)
     .is("assessment_no", null)
@@ -382,7 +369,6 @@ async function getGuruStudentsByAssignment(params: {
     const student = pickRelation(enrollment.students);
     const score = scoreByEnrollment.get(enrollment.id);
     const originalScore = score?.score ?? null;
-    const remedialScore = score?.remedial_score ?? null;
 
     return {
       enrollmentId: enrollment.id,
@@ -390,8 +376,6 @@ async function getGuruStudentsByAssignment(params: {
       studentName: student?.full_name ?? "-",
       nis: student?.nis ?? null,
       originalScore,
-      remedialScore,
-      finalScore: originalScore == null ? null : toFinalScore(originalScore, remedialScore),
       notes: score?.notes ?? "",
     };
   });
@@ -504,7 +488,7 @@ async function getAdminMonitorData(params: {
 
   let scoreQuery = admin
     .from("scores")
-    .select("id, enrollment_id, subject_id, score_type, assessment_no, score, remedial_score, notes, subjects(subject_name, subject_code)")
+    .select("id, enrollment_id, subject_id, score_type, assessment_no, score, notes, subjects(subject_name, subject_code)")
     .eq("score_type", params.scoreType)
     .is("assessment_no", null)
     .in("enrollment_id", enrollmentIds);
@@ -524,7 +508,6 @@ async function getAdminMonitorData(params: {
       const student = pickRelation(enrollment.students);
       const classroom = pickRelation(enrollment.classrooms);
       const subject = pickRelation(score.subjects);
-      const finalScore = toFinalScore(score.score, score.remedial_score);
 
       return {
         scoreId: score.id,
@@ -535,19 +518,16 @@ async function getAdminMonitorData(params: {
         subjectName: subject?.subject_name ?? "-",
         scoreType: params.scoreType,
         originalScore: score.score,
-        remedialScore: score.remedial_score,
-        finalScore,
       };
     })
     .filter((value): value is AdminScoreMonitorRow => value != null)
-    .sort((a, b) => b.finalScore - a.finalScore);
+    .sort((a, b) => b.originalScore - a.originalScore);
 
   const stats: AdminScoreStats = rows.length
     ? {
-        averageFinalScore: Number((rows.reduce((sum, row) => sum + row.finalScore, 0) / rows.length).toFixed(1)),
+        averageScore: Number((rows.reduce((sum, row) => sum + row.originalScore, 0) / rows.length).toFixed(1)),
         totalScoredStudents: rows.length,
-        highestScore: rows[0]?.finalScore ?? 0,
-        remedialCount: rows.filter((row) => row.remedialScore != null).length,
+        highestScore: rows[0]?.originalScore ?? 0,
       }
     : emptyAdminStats();
 
@@ -555,7 +535,7 @@ async function getAdminMonitorData(params: {
     studentName: row.studentName,
     classroomName: row.classroomName,
     subjectName: row.subjectName,
-    finalScore: row.finalScore,
+    score: row.originalScore,
   }));
 
   return {
@@ -754,19 +734,12 @@ export async function submitExamScores(input: SubmitExamScoresInput) {
     .map((entry) => ({
       enrollmentId: entry.enrollmentId.trim(),
       score: entry.score,
-      remedialScore: entry.remedialScore ?? null,
       notes: (entry.notes ?? "").trim(),
     }))
     .filter((entry) => entry.enrollmentId.length > 0);
 
   if (!cleanedEntries.length) {
     throw new Error("Tidak ada data siswa untuk disimpan.");
-  }
-
-  for (const entry of cleanedEntries) {
-    if (entry.score == null && entry.remedialScore != null) {
-      throw new Error("Nilai awal wajib diisi sebelum menambahkan remedial.");
-    }
   }
 
   const finalEntries = cleanedEntries.filter((entry) => entry.score != null);
@@ -776,7 +749,6 @@ export async function submitExamScores(input: SubmitExamScoresInput) {
 
   for (const entry of finalEntries) {
     validateScoreValue(entry.score, "Nilai awal");
-    validateScoreValue(entry.remedialScore, "Nilai remedial");
   }
 
   const enrollmentIds = [...new Set(finalEntries.map((entry) => entry.enrollmentId))];
@@ -812,7 +784,6 @@ export async function submitExamScores(input: SubmitExamScoresInput) {
     score_type: ExamScoreType;
     assessment_no: null;
     score: number;
-    remedial_score: number | null;
     notes: string | null;
     input_by_teacher_id: string;
   }> = [];
@@ -820,14 +791,12 @@ export async function submitExamScores(input: SubmitExamScoresInput) {
   const rowsToUpdate: Array<{
     scoreId: string;
     score: number;
-    remedialScore: number | null;
     notes: string | null;
   }> = [];
 
   for (const entry of finalEntries) {
     const payload = {
       score: entry.score as number,
-      remedial_score: entry.remedialScore,
       notes: entry.notes || null,
       input_by_teacher_id: teacher.id,
     };
@@ -837,7 +806,6 @@ export async function submitExamScores(input: SubmitExamScoresInput) {
       rowsToUpdate.push({
         scoreId: existingId,
         score: payload.score,
-        remedialScore: payload.remedial_score,
         notes: payload.notes,
       });
       continue;
@@ -849,7 +817,6 @@ export async function submitExamScores(input: SubmitExamScoresInput) {
       score_type: scoreType,
       assessment_no: null,
       score: payload.score,
-      remedial_score: payload.remedial_score,
       notes: payload.notes,
       input_by_teacher_id: teacher.id,
     });
@@ -861,7 +828,7 @@ export async function submitExamScores(input: SubmitExamScoresInput) {
         .from("scores")
         .update({
           score: row.score,
-          remedial_score: row.remedialScore,
+          remedial_score: null,
           notes: row.notes,
           input_by_teacher_id: teacher.id,
         })
@@ -874,7 +841,9 @@ export async function submitExamScores(input: SubmitExamScoresInput) {
   }
 
   if (rowsToInsert.length > 0) {
-    const { error: insertError } = await admin.from("scores").insert(rowsToInsert);
+    const { error: insertError } = await admin
+      .from("scores")
+      .insert(rowsToInsert.map((row) => ({ ...row, remedial_score: null })));
     if (insertError) {
       throw new Error(mapPostgresError(insertError.message));
     }

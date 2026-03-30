@@ -74,6 +74,9 @@ export function mapPostgresError(errorMessage: string) {
     if (lower.includes("enrollments_student_id_academic_period_id_key")) {
       return "Siswa sudah terdaftar pada periode akademik ini.";
     }
+    if (lower.includes("daily_assessments_assignment_id_assessment_no_key")) {
+      return "Nomor tugas harian untuk assignment ini sudah ada.";
+    }
 
     return "Data duplikat terdeteksi.";
   }
@@ -84,6 +87,10 @@ export function mapPostgresError(errorMessage: string) {
 
   if (lower.includes("scores_remedial_score_range_check")) {
     return "Nilai remedial harus di antara 0 sampai 100.";
+  }
+
+  if (lower.includes("daily_assessments_assessment_no_check")) {
+    return "Nomor tugas harian harus lebih besar dari 0.";
   }
 
   if (lower.includes("current period and target period cannot be the same")) {

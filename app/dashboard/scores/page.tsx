@@ -119,14 +119,14 @@ export default async function ScoresPage({ searchParams }: ScoresPageProps) {
               <p>
                 <span className="font-semibold">Mapel:</span> {data.guru.selectedAssignment.subjectName} ({data.guru.selectedAssignment.subjectCode})
               </p>
-              <p>
-                <span className="font-semibold">Rumus Final:</span> nilai tertinggi dari nilai awal vs remedial.
-              </p>
             </div>
           ) : null}
         </AdminFormCard>
 
-        <AdminFormCard title={`Input Nilai ${data.selectedScoreType.toUpperCase()}`} description="Isi nilai awal, remedial opsional, dan catatan per siswa.">
+        <AdminFormCard
+          title={`Input Nilai ${data.selectedScoreType.toUpperCase()}`}
+          description="Isi nilai dan catatan per siswa."
+        >
           {data.guru?.selectedAssignment ? (
             <form action={submitExamScoresAction} className="space-y-4">
               <input type="hidden" name="assignment_id" value={data.guru.selectedAssignment.id} />
@@ -135,9 +135,7 @@ export default async function ScoresPage({ searchParams }: ScoresPageProps) {
               <AdminDataTable
                 columns={[
                   { key: "student", label: "Siswa" },
-                  { key: "score", label: "Nilai Awal" },
-                  { key: "remedial", label: "Remedial" },
-                  { key: "final", label: "Final" },
+                  { key: "score", label: "Nilai" },
                   { key: "notes", label: "Catatan" },
                 ]}
                 hasRows={(data.guru.students.length ?? 0) > 0}
@@ -158,18 +156,6 @@ export default async function ScoresPage({ searchParams }: ScoresPageProps) {
                         inputMode="decimal"
                         placeholder="0-100"
                       />
-                    </td>
-                    <td className="px-4 py-3">
-                      <input
-                        name={`remedial_${student.enrollmentId}`}
-                        defaultValue={student.remedialScore ?? ""}
-                        className="w-28 rounded-md border border-slate-300 px-2 py-1 text-sm"
-                        inputMode="decimal"
-                        placeholder="opsional"
-                      />
-                    </td>
-                    <td className="px-4 py-3 text-sm font-semibold text-[#1e3b8a]">
-                      {student.finalScore != null ? student.finalScore : "-"}
                     </td>
                     <td className="px-4 py-3">
                       <input
@@ -200,10 +186,10 @@ export default async function ScoresPage({ searchParams }: ScoresPageProps) {
   }
 
   return (
-    <div className="mx-auto w-full max-w-7xl space-y-6 p-8">
+      <div className="mx-auto w-full max-w-7xl space-y-6 p-8">
       <AdminPageHeader
         title="Monitor Nilai UTS/UAS"
-        description="Pantau nilai final siswa berdasarkan filter periode, kelas, mapel, dan tipe nilai."
+        description="Pantau nilai siswa berdasarkan filter periode, kelas, mapel, dan tipe nilai."
       />
 
       <AdminStatusNotice status={params.status} message={params.message} />
@@ -283,8 +269,8 @@ export default async function ScoresPage({ searchParams }: ScoresPageProps) {
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Rata-rata Nilai Final</p>
-          <h3 className="mt-2 text-3xl font-black text-[#1e3b8a]">{data.admin?.stats.averageFinalScore ?? 0}</h3>
+          <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Rata-rata Nilai</p>
+          <h3 className="mt-2 text-3xl font-black text-[#1e3b8a]">{data.admin?.stats.averageScore ?? 0}</h3>
         </div>
         <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
           <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Siswa Ternilai</p>
@@ -294,23 +280,22 @@ export default async function ScoresPage({ searchParams }: ScoresPageProps) {
           <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Nilai Tertinggi</p>
           <h3 className="mt-2 text-3xl font-black text-green-600">{data.admin?.stats.highestScore ?? 0}</h3>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Siswa Remedial</p>
-          <h3 className="mt-2 text-3xl font-black text-amber-600">{data.admin?.stats.remedialCount ?? 0}</h3>
-        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <AdminFormCard title="Top 5 Highest Score" description="Diurutkan berdasarkan nilai final tertinggi.">
+        <AdminFormCard title="Top 5 Highest Score" description="Diurutkan berdasarkan nilai tertinggi.">
           <div className="space-y-3">
             {data.admin?.topScores.length ? (
               data.admin.topScores.map((row, index) => (
-                <div key={`${row.studentName}-${row.subjectName}-${row.finalScore}`} className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+                <div
+                  key={`${row.studentName}-${row.subjectName}-${row.score}`}
+                  className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-2"
+                >
                   <div>
                     <p className="text-sm font-semibold text-slate-800">#{index + 1} {row.studentName}</p>
                     <p className="text-xs text-slate-500">{row.classroomName} - {row.subjectName}</p>
                   </div>
-                  <span className="text-sm font-bold text-[#1e3b8a]">{row.finalScore}</span>
+                  <span className="text-sm font-bold text-[#1e3b8a]">{row.score}</span>
                 </div>
               ))
             ) : (
@@ -319,7 +304,7 @@ export default async function ScoresPage({ searchParams }: ScoresPageProps) {
           </div>
         </AdminFormCard>
 
-        <AdminFormCard title="Ringkasan" description="Nilai final dihitung dari nilai tertinggi nilai awal vs remedial.">
+        <AdminFormCard title="Ringkasan" description="Ringkasan monitoring nilai berdasarkan filter aktif.">
           <div className="rounded-lg border border-[#1e3b8a]/20 bg-[#1e3b8a]/5 px-4 py-3 text-sm text-slate-700">
             <p>
               Total data yang sedang dipantau: <span className="font-semibold">{data.admin?.rows.length ?? 0}</span> baris nilai.
@@ -337,9 +322,7 @@ export default async function ScoresPage({ searchParams }: ScoresPageProps) {
           { key: "classroom", label: "Kelas" },
           { key: "subject", label: "Mapel" },
           { key: "type", label: "Tipe" },
-          { key: "original", label: "Nilai Awal" },
-          { key: "remedial", label: "Remedial" },
-          { key: "final", label: "Final" },
+          { key: "original", label: "Nilai" },
         ]}
         hasRows={(data.admin?.rows.length ?? 0) > 0}
         emptyMessage="Belum ada data nilai UTS/UAS untuk filter ini."
@@ -354,8 +337,6 @@ export default async function ScoresPage({ searchParams }: ScoresPageProps) {
             <td className="px-4 py-3 text-sm text-slate-700">{row.subjectName}</td>
             <td className="px-4 py-3 text-sm uppercase text-slate-700">{row.scoreType}</td>
             <td className="px-4 py-3 text-sm text-slate-700">{row.originalScore}</td>
-            <td className="px-4 py-3 text-sm text-slate-700">{row.remedialScore ?? "-"}</td>
-            <td className="px-4 py-3 text-sm font-semibold text-[#1e3b8a]">{row.finalScore}</td>
           </tr>
         ))}
       </AdminDataTable>
