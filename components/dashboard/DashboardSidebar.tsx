@@ -79,7 +79,8 @@ function getNavItems(role: DashboardRole): NavItem[] {
 
   return [
     { label: "Dashboard", icon: "dashboard", href: "/dashboard", roles: ["murid"] },
-    { label: "Nilai Raport", icon: "description", href: "/dashboard", roles: ["murid"] },
+    { label: "Riwayat Nilai", icon: "grade", href: "/dashboard/learning", roles: ["murid"] },
+    { label: "Riwayat Absensi", icon: "fact_check", href: "/dashboard/my-attendance", roles: ["murid"] },
   ];
 }
 
