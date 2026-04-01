@@ -1,6 +1,7 @@
 import { AdminDataTable } from "@/components/admin/AdminDataTable";
 import { AdminFormCard } from "@/components/admin/AdminFormCard";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { AutoSubmitFilterForm } from "@/components/filters/AutoSubmitFilterForm";
 import { getStudentAttendancePageData } from "@/lib/student-progress/service";
 
 type StudentAttendancePageProps = {
@@ -48,7 +49,7 @@ export default async function StudentAttendancePage({ searchParams }: StudentAtt
       />
 
       <AdminFormCard title="Filter Absensi" description="Pilih periode dan bulan untuk menampilkan riwayat.">
-        <form action="/dashboard/my-attendance" className="grid gap-4 md:grid-cols-[1.2fr_1fr_auto]">
+        <form id="student-attendance-filter-form" action="/dashboard/my-attendance" className="grid gap-4 md:grid-cols-[1.2fr_1fr_auto]">
           <label className="space-y-1">
             <span className="text-sm font-medium text-slate-700">Periode</span>
             <select
@@ -89,6 +90,7 @@ export default async function StudentAttendancePage({ searchParams }: StudentAtt
             </button>
           </div>
         </form>
+        <AutoSubmitFilterForm formId="student-attendance-filter-form" />
 
         <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
           <p>
@@ -136,7 +138,7 @@ export default async function StudentAttendancePage({ searchParams }: StudentAtt
           { key: "notes", label: "Catatan" },
         ]}
         hasRows={data.rows.length > 0}
-        emptyMessage="Belum ada data absensi pada filter ini."
+        emptyMessage="Belum ada data absensi untuk periode/bulan yang dipilih."
       >
         {data.rows.map((row) => (
           <tr key={row.id}>
@@ -155,4 +157,3 @@ export default async function StudentAttendancePage({ searchParams }: StudentAtt
     </div>
   );
 }
-

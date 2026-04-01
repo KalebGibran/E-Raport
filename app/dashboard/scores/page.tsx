@@ -2,6 +2,7 @@ import { AdminDataTable } from "@/components/admin/AdminDataTable";
 import { AdminFormCard } from "@/components/admin/AdminFormCard";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { AdminStatusNotice } from "@/components/admin/AdminStatusNotice";
+import { AutoSubmitFilterForm } from "@/components/filters/AutoSubmitFilterForm";
 import { submitExamScoresAction } from "@/app/dashboard/_actions/scores";
 import { getScorePageData } from "@/lib/scores/service";
 
@@ -56,7 +57,7 @@ export default async function ScoresPage({ searchParams }: ScoresPageProps) {
         </AdminFormCard>
 
         <AdminFormCard title="Filter Input Nilai" description="Pilih kelas, mapel, dan tipe nilai untuk mulai input.">
-          <form action="/dashboard/scores" className="grid gap-4 md:grid-cols-[1.2fr_1.4fr_1fr_auto]">
+          <form id="guru-scores-filter-form" action="/dashboard/scores" className="grid gap-4 md:grid-cols-[1.2fr_1.4fr_1fr_auto]">
             <label className="space-y-1">
               <span className="text-sm font-medium text-slate-700">Kelas</span>
               <select
@@ -110,6 +111,7 @@ export default async function ScoresPage({ searchParams }: ScoresPageProps) {
               </button>
             </div>
           </form>
+          <AutoSubmitFilterForm formId="guru-scores-filter-form" />
 
           {data.guru?.selectedAssignment ? (
             <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
@@ -195,7 +197,7 @@ export default async function ScoresPage({ searchParams }: ScoresPageProps) {
       <AdminStatusNotice status={params.status} message={params.message} />
 
       <AdminFormCard title="Filter Monitor" description="Filter data monitoring nilai untuk analisis cepat.">
-        <form action="/dashboard/scores" className="grid gap-4 md:grid-cols-4">
+        <form id="admin-scores-filter-form" action="/dashboard/scores" className="grid gap-4 md:grid-cols-4">
           <label className="space-y-1">
             <span className="text-sm font-medium text-slate-700">Periode</span>
             <select
@@ -265,6 +267,7 @@ export default async function ScoresPage({ searchParams }: ScoresPageProps) {
             </button>
           </div>
         </form>
+        <AutoSubmitFilterForm formId="admin-scores-filter-form" />
       </AdminFormCard>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">

@@ -42,6 +42,12 @@ function getNavItems(role: DashboardRole): NavItem[] {
         roles: ["admin"],
       },
       {
+        label: "Wali Kelas",
+        icon: "supervisor_account",
+        href: "/dashboard/homerooms",
+        roles: ["admin"],
+      },
+      {
         label: "Rekap Absensi",
         icon: "fact_check",
         href: "/dashboard/attendance",
@@ -60,6 +66,12 @@ function getNavItems(role: DashboardRole): NavItem[] {
         roles: ["admin"],
       },
       {
+        label: "Rekap Siswa",
+        icon: "description",
+        href: "/dashboard/recap",
+        roles: ["admin"],
+      },
+      {
         label: "Academic Management",
         icon: "school",
         href: "/dashboard/promotion",
@@ -74,11 +86,13 @@ function getNavItems(role: DashboardRole): NavItem[] {
       { label: "Absensi", icon: "fact_check", href: "/dashboard/attendance", roles: ["guru"] },
       { label: "Nilai UTS/UAS", icon: "grade", href: "/dashboard/scores", roles: ["guru"] },
       { label: "Nilai Harian", icon: "assignment", href: "/dashboard/daily-scores", roles: ["guru"] },
+      { label: "Validasi Raport", icon: "verified", href: "/dashboard/validation", roles: ["guru"] },
     ];
   }
 
   return [
     { label: "Dashboard", icon: "dashboard", href: "/dashboard", roles: ["murid"] },
+    { label: "Hasil Belajar", icon: "child_care", href: "/dashboard/recap", roles: ["murid"] },
     { label: "Riwayat Nilai", icon: "grade", href: "/dashboard/learning", roles: ["murid"] },
     { label: "Riwayat Absensi", icon: "fact_check", href: "/dashboard/my-attendance", roles: ["murid"] },
   ];

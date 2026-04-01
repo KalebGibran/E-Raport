@@ -71,6 +71,12 @@ export function mapPostgresError(errorMessage: string) {
     if (lower.includes("subject_teacher_assignments_subject_id_classroom_id_academic_p_key")) {
       return "Assignment mapel untuk kelas & periode ini sudah ada.";
     }
+    if (lower.includes("homeroom_assignments_classroom_id_academic_period_id_key")) {
+      return "Kelas pada periode ini sudah punya wali kelas.";
+    }
+    if (lower.includes("homeroom_assignments_teacher_id_academic_period_id_key")) {
+      return "Guru ini sudah menjadi wali kelas pada periode tersebut.";
+    }
     if (lower.includes("enrollments_student_id_academic_period_id_key")) {
       return "Siswa sudah terdaftar pada periode akademik ini.";
     }

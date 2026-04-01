@@ -3,6 +3,7 @@ import { AdminFormCard } from "@/components/admin/AdminFormCard";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { AdminStatusNotice } from "@/components/admin/AdminStatusNotice";
 import { AdminAttendanceRecapView } from "@/components/attendance/admin/AdminAttendanceRecapView";
+import { AutoSubmitFilterForm } from "@/components/filters/AutoSubmitFilterForm";
 import { submitAttendanceAction } from "@/app/dashboard/_actions/attendance";
 import { getAttendancePageData } from "@/lib/attendance/service";
 
@@ -82,7 +83,7 @@ export default async function AttendancePage({ searchParams }: AttendancePagePro
       </AdminFormCard>
 
       <AdminFormCard title="Filter Absensi" description="Pilih kelas dan tanggal untuk menampilkan siswa.">
-        <form action="/dashboard/attendance" className="grid gap-4 md:grid-cols-[2fr_1fr_auto]">
+        <form id="guru-attendance-filter-form" action="/dashboard/attendance" className="grid gap-4 md:grid-cols-[2fr_1fr_auto]">
           <label className="space-y-1">
             <span className="text-sm font-medium text-slate-700">Kelas</span>
             <select
@@ -118,6 +119,7 @@ export default async function AttendancePage({ searchParams }: AttendancePagePro
             </button>
           </div>
         </form>
+        <AutoSubmitFilterForm formId="guru-attendance-filter-form" />
 
         {data.isWeekend ? (
           <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">

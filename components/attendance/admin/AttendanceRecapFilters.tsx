@@ -1,4 +1,5 @@
 import { AttendanceMonthOption, ClassroomOption } from "@/lib/attendance/service";
+import { AutoSubmitFilterForm } from "@/components/filters/AutoSubmitFilterForm";
 
 type AttendanceRecapFiltersProps = {
   classrooms: ClassroomOption[];
@@ -15,7 +16,7 @@ export function AttendanceRecapFilters({
 }: AttendanceRecapFiltersProps) {
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-4">
-      <form action="/dashboard/attendance" className="flex flex-wrap items-end gap-4">
+      <form id="admin-attendance-filter-form" action="/dashboard/attendance" className="flex flex-wrap items-end gap-4">
         <label className="min-w-[220px] flex-1">
           <span className="mb-1 ml-1 block text-[10px] font-bold uppercase text-slate-500">Class Room</span>
           <select
@@ -73,6 +74,7 @@ export function AttendanceRecapFilters({
           </div>
         </div>
       </form>
+      <AutoSubmitFilterForm formId="admin-attendance-filter-form" />
     </div>
   );
 }

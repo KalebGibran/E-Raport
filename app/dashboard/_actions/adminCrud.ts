@@ -9,6 +9,7 @@ import { createStudent, deactivateStudent, updateStudent } from "@/lib/admin/stu
 import { createTeacher, deleteTeacher, updateTeacher } from "@/lib/admin/teachers";
 import { createSubject, deactivateSubject, updateSubject } from "@/lib/admin/subjects";
 import { createAssignment, deleteAssignment } from "@/lib/admin/assignments";
+import { createHomeroomAssignment, deleteHomeroomAssignment } from "@/lib/admin/homerooms";
 import {
   getPromotionPreview,
   promoteStudents,
@@ -302,6 +303,43 @@ export async function deleteAssignmentAction(formData: FormData) {
 
   revalidatePath(path);
   redirect(toUrl(path, "success", "Assignment berhasil dihapus."));
+}
+
+export async function createHomeroomAssignmentAction(formData: FormData) {
+  const path = "/dashboard/homerooms";
+
+  try {
+    await createHomeroomAssignment({
+      teacherId: cleanText(formData.get("teacher_id")),
+      classroomId: cleanText(formData.get("classroom_id")),
+      periodId: cleanText(formData.get("academic_period_id")),
+    });
+  } catch (error) {
+    handleActionError(path, error);
+  }
+
+  revalidatePath(path);
+  revalidatePath("/dashboard");
+  redirect(toUrl(path, "success", "Wali kelas berhasil ditetapkan."));
+}
+
+export async function deleteHomeroomAssignmentAction(formData: FormData) {
+  const path = "/dashboard/homerooms";
+  const assignmentId = cleanText(formData.get("assignment_id"));
+
+  if (!assignmentId) {
+    redirect(toUrl(path, "error", "ID assignment wali kelas tidak valid."));
+  }
+
+  try {
+    await deleteHomeroomAssignment(assignmentId);
+  } catch (error) {
+    handleActionError(path, error);
+  }
+
+  revalidatePath(path);
+  revalidatePath("/dashboard");
+  redirect(toUrl(path, "success", "Assignment wali kelas berhasil dihapus."));
 }
 
 export async function promoteStudentsAction(formData: FormData) {

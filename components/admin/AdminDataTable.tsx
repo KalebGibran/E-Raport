@@ -36,8 +36,12 @@ export function AdminDataTable({ columns, hasRows, emptyMessage, children }: Adm
               children
             ) : (
               <tr>
-                <td colSpan={columns.length} className="px-4 py-8 text-center text-sm text-slate-500">
-                  {emptyMessage}
+                <td colSpan={columns.length} className="px-4 py-10 text-center">
+                  <div className="mx-auto flex max-w-md flex-col items-center gap-2 rounded-xl border border-dashed border-slate-200 bg-slate-50 px-6 py-6">
+                    <span className="material-symbols-outlined text-slate-400">inbox</span>
+                    <p className="text-sm font-semibold text-slate-700">Belum ada data</p>
+                    <p className="text-sm text-slate-500">{emptyMessage}</p>
+                  </div>
                 </td>
               </tr>
             )}
@@ -47,4 +51,3 @@ export function AdminDataTable({ columns, hasRows, emptyMessage, children }: Adm
     </div>
   );
 }
-

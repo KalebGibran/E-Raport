@@ -3,6 +3,7 @@ import { AdminFormCard } from "@/components/admin/AdminFormCard";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { AdminStatusNotice } from "@/components/admin/AdminStatusNotice";
 import { DailyScoresMatrixTable } from "@/components/daily-scores/admin/DailyScoresMatrixTable";
+import { AutoSubmitFilterForm } from "@/components/filters/AutoSubmitFilterForm";
 import {
   createDailyAssessmentAction,
   deleteDailyAssessmentAction,
@@ -91,7 +92,7 @@ export default async function DailyScoresPage({ searchParams }: DailyScoresPageP
         ) : null}
 
         <AdminFormCard title="Filter Kelas & Mapel" description="Pilih kelas, mapel, dan task yang ingin dikelola.">
-          <form action="/dashboard/daily-scores" className="grid gap-4 md:grid-cols-[1.1fr_1.4fr_1.8fr_auto]">
+          <form id="guru-daily-scores-filter-form" action="/dashboard/daily-scores" className="grid gap-4 md:grid-cols-[1.1fr_1.4fr_1.8fr_auto]">
             <label className="space-y-1">
               <span className="text-sm font-medium text-slate-700">Kelas</span>
               <select
@@ -149,6 +150,7 @@ export default async function DailyScoresPage({ searchParams }: DailyScoresPageP
               </button>
             </div>
           </form>
+          <AutoSubmitFilterForm formId="guru-daily-scores-filter-form" />
 
           {data.guru?.selectedAssignment ? (
             <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
@@ -393,7 +395,7 @@ export default async function DailyScoresPage({ searchParams }: DailyScoresPageP
       <AdminStatusNotice status={params.status} message={params.message} />
 
       <AdminFormCard title="Filter Monitor" description="Data read-only untuk analisa admin.">
-        <form action="/dashboard/daily-scores" className="grid gap-4 md:grid-cols-5">
+        <form id="admin-daily-scores-filter-form" action="/dashboard/daily-scores" className="grid gap-4 md:grid-cols-5">
           <label className="space-y-1">
             <span className="text-sm font-medium text-slate-700">Periode</span>
             <select
@@ -482,6 +484,7 @@ export default async function DailyScoresPage({ searchParams }: DailyScoresPageP
             </button>
           </div>
         </form>
+        <AutoSubmitFilterForm formId="admin-daily-scores-filter-form" />
       </AdminFormCard>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">

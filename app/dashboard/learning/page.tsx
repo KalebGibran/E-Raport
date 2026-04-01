@@ -1,6 +1,7 @@
 import { AdminDataTable } from "@/components/admin/AdminDataTable";
 import { AdminFormCard } from "@/components/admin/AdminFormCard";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { AutoSubmitFilterForm } from "@/components/filters/AutoSubmitFilterForm";
 import { getStudentLearningPageData } from "@/lib/student-progress/service";
 
 type StudentLearningPageProps = {
@@ -16,6 +17,14 @@ function formatIdDate(dateValue: string) {
     dateStyle: "medium",
     timeZone: "UTC",
   }).format(new Date(`${dateValue}T00:00:00.000Z`));
+}
+
+function scorePredikat(score: number | null) {
+  if (score == null) return null;
+  if (score >= 90) return { label: "A", className: "border-emerald-200 bg-emerald-50 text-emerald-700" };
+  if (score >= 80) return { label: "B", className: "border-blue-200 bg-blue-50 text-blue-700" };
+  if (score >= 70) return { label: "C", className: "border-amber-200 bg-amber-50 text-amber-700" };
+  return { label: "D", className: "border-red-200 bg-red-50 text-red-700" };
 }
 
 export const dynamic = "force-dynamic";
@@ -36,7 +45,7 @@ export default async function StudentLearningPage({ searchParams }: StudentLearn
       />
 
       <AdminFormCard title="Filter Riwayat Nilai" description="Pilih periode dan mapel untuk memfilter data.">
-        <form action="/dashboard/learning" className="grid gap-4 md:grid-cols-[1.4fr_1.4fr_auto]">
+        <form id="student-learning-filter-form" action="/dashboard/learning" className="grid gap-4 md:grid-cols-[1.4fr_1.4fr_auto]">
           <label className="space-y-1">
             <span className="text-sm font-medium text-slate-700">Periode</span>
             <select
@@ -78,6 +87,7 @@ export default async function StudentLearningPage({ searchParams }: StudentLearn
             </button>
           </div>
         </form>
+        <AutoSubmitFilterForm formId="student-learning-filter-form" />
 
         <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
           <p>
@@ -100,6 +110,7 @@ export default async function StudentLearningPage({ searchParams }: StudentLearn
           { key: "uts", label: "UTS", align: "right" },
           { key: "uas", label: "UAS", align: "right" },
           { key: "overall", label: "Rata-rata", align: "right" },
+          { key: "predikat", label: "Predikat", align: "right" },
         ]}
         hasRows={data.subjectRows.length > 0}
         emptyMessage="Belum ada nilai pada filter ini."
@@ -115,6 +126,18 @@ export default async function StudentLearningPage({ searchParams }: StudentLearn
             <td className="px-4 py-3 text-right text-sm">{row.uasScore ?? "-"}</td>
             <td className="px-4 py-3 text-right text-sm font-semibold text-[#1e3b8a]">
               {row.overallAverage ?? "-"}
+            </td>
+            <td className="px-4 py-3 text-right text-sm">
+              {(() => {
+                const predikat = scorePredikat(row.overallAverage);
+                return predikat ? (
+                  <span className={`rounded-full border px-2.5 py-1 text-xs font-bold ${predikat.className}`}>
+                    {predikat.label}
+                  </span>
+                ) : (
+                  "-"
+                );
+              })()}
             </td>
           </tr>
         ))}
@@ -152,4 +175,3 @@ export default async function StudentLearningPage({ searchParams }: StudentLearn
     </div>
   );
 }
-
